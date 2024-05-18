@@ -1,0 +1,27 @@
+{% extends "escaped.html" %}
+{% block content %}
+<table class="table-dark border-danger">
+<tr>
+  <td>ID</td>
+  <td>Email</td>
+  <td>Edit</td>
+  <td>Delete</td>
+  <td>Disable</td>
+</tr>
+{%- for user in users -%}
+<tr>
+  <td>{{ user.id }}</td>
+  <td>{{ user.email }}</td>
+  <td>
+    <button class="edit-user" data-id="{{ user.id }}">Edit</button>
+  </td>
+  <td>
+    <button class="delete-user" data-id="{{ user.id }}">Delete</button>
+  </td>
+  <td>
+    <button class="deactivate" data-id="{{ user.id }}">Deactivate</button>
+  </td>
+</tr>
+{% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title></title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/css/jsoneditor.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  </head>
+  <body>
+    <h1>Form test</h1>
+    <form>
+      <div id="editor_holder"></div>
+      <input type="submit" value="Submit" id="submit" />
+    </form>
+    <script>
+        // JSONEditor.defaults.options.theme = 'bootstrap4';
+        submit = document.getElementById("submit");
+
+        submit.addEventListener("click", function (event) {
+            event.preventDefault();
+            var json = editor.getValue();
+            console.log(json);
+            var form = document.createElement("form");
+            form.setAttribute("method", "post");
+            form.setAttribute("action", "/form-test/{{ model_name }}");
+            var hiddenField = document.createElement("input");
+            hiddenField.setAttribute("type", "hidden");
+            hiddenField.setAttribute("name", "json");
+            hiddenField.setAttribute("value", JSON.stringify(json));
+            form.appendChild(hiddenField);
+            document.body.appendChild(form);
+            form.submit();
+        });
+        let schema;
+        $.getJSON('http://127.0.0.1:8000/models/NPC', function (data) { schema=data['model_schema']; }).done(
+            function (data) {
+                var jsonSchema = {
+                    use_name_attributes: true,
+                    title: "NPC",
+                    schema: schema,
+                };
+
+                var editor = new JSONEditor(
+          document.getElementById("editor_holder"),
+          {schema: jsonSchema}
+        );
+            }
+        );
+
+
+        // if jsoneditor type is undefined, then load the script using jquery: https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js
+        // if (typeof JSONEditor === 'undefined') {
+        //     $.getScript('https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js')
+        //         .done(function(script, textStatus) {
+        //             console.log( textStatus );
+        //         })
+        //         .fail(function(jqxhr, settings, exception) {
+        //             console.log( exception );
+        //     });
+        // }
+
+        // var editor = new JSONEditor(
+        //   document.getElementById("editor_holder"),
+        //   {schema: jsonSchema}
+        // );
+        // editor.on('ready', function() {
+        //   nameEditor = editor.getEditor('root.name');
+        //   nameEditor.disable();
+        //   nameEditor.control.hidden = true;
+        //   idEditor = editor.getEditor('root.id');
+        //   idEditor.disable();
+        // });
+    </script>
+  </body>
+</html>

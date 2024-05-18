@@ -1,0 +1,154 @@
+/* .left-column {
+    width: 15%;
+    padding: 0.5em;
+}
+
+.center-column {
+    width: 60%;
+}
+
+.right-column {
+    width: 25%;
+    padding: 0.5em;
+}
+
+.full-column {
+    background-color: rgb(80, 80, 80);
+    height: 99.5%;
+    display: block;
+    border-radius: 10px;
+    border: 1px solid white;
+    margin: auto;
+}
+
+hr {
+    flex-direction: row;
+    display: flex;
+} */
+
+:root {
+    --gray: #CACACA;
+    --dark-gray: #2f2f2f;
+}
+
+
+#json-editor-form .bg-light, #rootswitcher {
+    background-color: gray !important;
+}
+
+#rootswitcher {
+    display: none;
+}
+
+#json-editor-form {
+    color: var(--black) !important;
+}
+
+*[data-schemaid="root"] > b {
+    color: var(--white) !important;
+}
+
+.text-gray {
+    color: var(--gray) !important;
+
+}
+
+.tag-btn {
+    filter: grayscale(0.9) brightness(0.5);
+}
+
+.tag-btn.active, .tag-btn:active {
+    /* background-color: var(--greenish) !important; */
+    filter: grayscale(0) brightness(2.0);
+    /* backdrop-filter: grayscale(0) lighten(0.5); */
+    /* mix-blend-mode: multiply; */
+    /* color: #fff; */
+}
+
+.tag-btn.active > span, .tag-btn:active > span {
+    filter: grayscale(0) brightness(2.0) invert(1);
+}
+
+/* .lighten {
+    background: inherit;
+    background-clip: text;
+    color: transparent;
+    mix-blend-mode: difference;
+    filter: invert(1) grayscale(1) contrast(9);
+} */
+
+.type-btn {
+    filter: grayscale(0.9) brightness(0.5);
+}
+
+.type-btn.active, .type-btn:active {
+    filter: grayscale(0) brightness(2.0);
+    /* background-color: var(--greenish) !important; */
+}
+
+.type-btn.active > span, .type-btn:active > span {
+    filter: grayscale(0) brightness(2.0) invert(1);
+}
+
+select.je-switcher {
+    /* display: none; */
+}
+
+.form-control:disabled {
+    filter: brightness(0.7);
+}
+
+#assetCreatorFormContainer > *,
+#edgeCreatorFormContainer > * {
+    color: black;
+    /* background-color: var(--gray); */
+}
+
+/* #graph { */
+    /* height: 90dvh; */
+    /* border-top: 1px solid white; */
+    /* position: static; */
+/* } */
+
+#graph-element-controls {
+    /* position: absolute;
+    z-index: 10;
+    left: 17dvw;
+    width: 5dvw; */
+}
+
+
+#notes-container {
+    /* position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24vw;
+    margin-bottom: 0; */
+}
+
+#notes-container label {
+    /* display: block;
+    margin-bottom: 0.5em;
+    margin-top: 0.5em;
+    font-size: large; */
+}
+
+#editor-area > div > div > div {
+    color: black;
+}
+
+.editor-toolbar {
+    background-color: rgb(255, 80, 80) !important;
+}
+
+#graph, #editor-area {
+    height: 100dvh;
+}
+
+label[for="root"] {
+    display: none;
+}
+
+#newTag::placeholder {
+    color: #888;
+}

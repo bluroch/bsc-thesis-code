@@ -1,0 +1,484 @@
+{% extends "base.html" %} {% block title %}Editor{% endblock %} {% block head %}
+{{ super() }}
+<style type="text/css">
+  .error {
+    color: rgb(168, 0, 0);
+  }
+</style>
+<link rel="stylesheet" href="{{ url_for('static', path='/editor.css') }}" />
+<script
+  type="text/javascript"
+  src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"
+></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/css/jsoneditor.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css"
+/>
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+<!-- <script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"
+></script> -->
+{% endblock %} {% block scripts %} {{ super() }}
+<script>
+  let nodes = new vis.DataSet({{ nodes|safe }});
+  let edges = new vis.DataSet({{ edges|safe }});
+  console.log({{ nodes|safe }});
+  console.log({{ edges|safe }});
+  let nodeCount = nodes.length;
+  let edgeCount = edges.length;
+  let modelNames = {{ model_names|safe }};
+
+  document.getElementById("nodeCount").innerText = nodeCount;
+  document.getElementById("edgeCount").innerText = edgeCount;
+</script>
+<script src="{{ url_for('static', path='/scripts/editor.js') }}"></script>
+<script src="{{ url_for('static', path='/scripts/graph.js') }}"></script>
+<script src="{{ url_for('static', path='/scripts/common.js') }}"></script>
+<script src="{{ url_for('static', path='/scripts/filtering.js') }}"></script>
+{% endblock %} {% block content %}
+<div class="row row-cols-12">
+  <div class="col col-8 vh-100 bg-secondary" id="graph">Graph</div>
+  <div class="col col-4 vh-100 bg-dark border-start overflow-y-scroll overflow-x-hidden p-3" id="editor-area">
+    <h2 id="data-type-text">Asset Editor</h2>
+    <hr />
+    <div hidden id="editorTagContainer">
+      <h3>Tags</h3>
+      <div id="nodeTagContainer" class="mb-2 gap-2 d-flex"></div>
+      <hr>
+    </div>
+    <!-- <form id="json-editor-form" action="/update_asset" method="post"> -->
+    <!-- <form id="json-editor-form"> -->
+    <div id="json-editor-container"></div>
+    <div id="error-container"></div>
+    <div id="editorControls" hidden>
+      <div class="d-flex gap-2">
+        <button type="button" id="save-btn" class="btn btn-success rounded-pill" onclick="saveAsset()">
+          <i class="bi bi-floppy me-2"></i>Save
+        </button>
+        <button id="save-notes-btn" class="btn btn-success rounded-pill me-auto" onclick="saveNotes()">
+          <i class="bi bi-journal me-2"></i>Save notes
+        </button>
+        <button type="button" class="btn btn-delete rounded-pill" data-bs-toggle="modal"
+          data-bs-target="#deleteConfirmationModal">
+          <i class="bi bi-trash me-2"></i>Delete
+        </button>
+      </div>
+    </div>
+    <!-- </form> -->
+    <div id="result-container"></div>
+    <!-- <form method="post"> -->
+
+    <div class="mt-3" id="notes-container"></div>
+    <!-- </form> -->
+  </div>
+</div>
+<div class="position-absolute bottom-0 start-0 m-3 g-3 d-flex gap-5 align-items-center">
+  <button class="btn btn-primary rounded-pill fs-3 px-3" type="button" data-bs-toggle="offcanvas"
+    data-bs-target="#graphNav" aria-controls="graphNav">
+    <i class="bi bi-list me-2"></i>Open menu
+  </button>
+  <button type="button" class="btn btn-success rounded-pill fs-3 px-3" data-bs-toggle="modal"
+    data-bs-target="#createAssetModal">
+    <i class="bi bi-file-plus me-2"></i>Add asset
+  </button>
+  <button type="button" class="btn btn-delete rounded-pill fs-3 px-3" data-bs-toggle="modal"
+    data-bs-target="#deleteConfirmationModal">
+    <i class="bi bi-trash me-2"></i>Delete asset
+  </button>
+  <button type="button" class="btn btn-light rounded-pill fs-3 px-3" data-bs-toggle="modal"
+  data-bs-target="#createEdgeModal"><i class="bi bi-arrow-up-right me-2"></i>Add
+    edge</button>
+  <div class="rounded-pill fs-3 px-3">
+    <span id="nodeCount">0</span> nodes and <span id="edgeCount">0</span> edges
+  </div>
+</div>
+{% endblock %} {% block offcanvas %}
+<div
+  class="offcanvas offcanvas-start bg-dark text-primary"
+  tabindex="-1"
+  id="graphNav"
+  aria-labelledby="graphNavLabel"
+>
+  <div class="offcanvas-header">
+    <h2 class="offcanvas-title" id="offcanvasExampleLabel">Filter</h2>
+    <button
+      type="button"
+      class="btn-close text-reset"
+      data-bs-dismiss="offcanvas"
+      aria-label="Close"
+    ></button>
+  </div>
+  <div class="offcanvas-body">
+    <div id="tagSelector">
+      <h3>Tags</h3>
+      <p class="fs-6 text-gray">
+        Nodes tagged with any of the selected tags will show up on the graph.
+      </p>
+      <div class="d-flex w-100 gap-2 mb-2" id="tagSelectorContainer">
+        {% for tag in tags %}
+        <button
+          class="btn rounded-pill tag-btn p-2 flex-noshrink"
+          id="tagBtn-{{ tag }}"
+          data-tag="{{ tag }}"
+          onclick="toggleTagSelection('{{ tag }}')"
+        >
+          <span class="lighten">{{ tag }}</span>
+        </button>
+        <script>
+          document
+            .querySelectorAll("[data-tag='{{ tag }}']")
+            .forEach((btn) => {
+              btn.style.background = stringToColor("{{ tag }}");
+            });
+        </script>
+        {% endfor %}
+      </div>
+      <div class="w-100 mt-3 d-flex gap-2 justify-content-between ">
+        <div class="d-block">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="tagInclusion"
+              id=""
+              value="include"
+            />
+            <label class="form-check-label" for="">Include tagged nodes</label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="tagInclusion"
+              id=""
+              value="exclude"
+              checked
+            />
+            <label class="form-check-label" for="">Exclude tagged nodes</label>
+          </div>
+        </div>
+        <button class="btn btn-success rounded-pill" onclick="toggleAllTags()">
+          <i class="bi bi-circle-half me-2"></i>Invert selection
+        </button>
+      </div>
+      <!-- <div class="d-flex m-auto">
+        <button
+          class="btn btn-success rounded-pill tag-btn m-auto w-50 active"
+          onclick="toggleAllTags()"
+        >
+          Toggle all
+        </button>
+
+      </div> -->
+    </div>
+    <hr>
+    <div class="mt-4">
+      <h3>Node types</h3>
+      <p class="fs-6 text-gray">
+        Nodes with any of the selected types will show up on the graph.
+      </p>
+      <div class="d-flex w-100 gap-2 mb-2 flex-wrap" id="typeSelectorContainer">
+
+        {% for model in node_model_names %}
+        <button
+          class="btn rounded-pill type-btn p-2 flex-noshrink active"
+          id="typeBtn-{{ model }}"
+          data-type="{{ model }}"
+          onclick="toggleTypeSelection('{{ model }}')"
+          data-id="{{ model }}"
+          onclick="toggleTypeSelection('{{ model }}')"
+        >
+        <span class="lighten">{{ model }}</span>
+        </button>
+        <script>
+          document
+            .querySelectorAll("[data-type='{{ model }}']")
+            .forEach((btn) => {
+              btn.style.background = stringToColor("{{ model }}");
+            });
+        </script>
+        {% endfor %}
+      </div>
+      <div class="w-100 mt-3 d-flex gap-2 justify-content-between ">
+        <div class="d-block">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="typeInclusion"
+              id=""
+              value="include"
+              checked
+            />
+            <label class="form-check-label" for="">Include selected types</label>
+          </div>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="typeInclusion"
+              id=""
+              value="exclude"
+            />
+            <label class="form-check-label" for="">Exclude selected types</label>
+          </div>
+        </div>
+        <button class="btn btn-success rounded-pill" onclick="toggleAllTypes()">
+          <i class="bi bi-circle-half me-2"></i>Invert selection
+        </button>
+      </div>
+    </div>
+    <div class="mt-4 text-center">
+      <button type="button" class="btn btn-primary rounded-pill m-auto" onclick="refreshGraph()">
+        <i class="bi bi-arrow-clockwise me-2"></i>
+        Refresh graph
+      </button>
+    </div>
+    <hr>
+    <div id="addTag" class="mt-5">
+      <h3>Add tags</h3>
+      <p class="fs-6 text-gray">Add new tags with the panel below.</p>
+      <div class="w-100 m-auto d-flex gap-2 justify-content-between  align-items-center">
+        <div>
+          <input
+            type="text"
+            class="form-control bg-black text-primary"
+            name="newTag"
+            id="newTag"
+            aria-describedby="helpId"
+            placeholder="Name of the tag"
+          />
+        </div>
+        <button
+          type="button"
+          class="btn btn-success rounded-pill"
+          onclick="createTag()"
+        >
+          <i class="bi bi-plus me-2"></i>Add tag
+        </button>
+      </div>
+    </div>
+    <div class="position-absolute d-flex start-0 w-100 bottom-0 p-2">
+      <div class="w-100 justify-content-evenly flex-grow-0 d-flex">
+        <a
+          name="main-btn"
+          id="main-btn"
+          class="btn btn-primary rounded-pill"
+          href="/main"
+          role="button"
+          ><i class="bi bi-arrow-return-left me-2"></i>Main</a
+        >
+        <a
+          name="profile-btn"
+          id="profile-btn"
+          class="btn btn-primary rounded-pill"
+          href="/profile"
+          role="button"
+          ><i class="bi bi-person me-2"></i>Profile</a
+        >
+        <a
+          name="logout-btn"
+          id="logout-btn"
+          class="btn btn-red rounded-pill"
+          href="#"
+          onclick="logout()"
+          role="button"
+          ><i class="bi bi-x-lg me-2"></i>Logout</a
+        >
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block modals %}
+<div
+  class="modal fade"
+  id="deleteConfirmationModal"
+  tabindex="-1"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+  role="dialog"
+  aria-labelledby="deleteConfirmationModalTitleId"
+  aria-hidden="true"
+>
+  <div
+    class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-sm"
+    role="document"
+  >
+    <div class="modal-content bg-dark h-25">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteConfirmationModalTitleId">
+          Confirm asset deletion
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">Are you sure about deleting this asset?</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-delete" id="delete-btn" onclick="deleteAsset()">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="createAssetModal"
+  tabindex="-1"
+  data-bs-keyboard="false"
+  role="dialog"
+  aria-labelledby="createAssetModalTitleId"
+  aria-hidden="true"
+>
+  <div
+    class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg"
+    role="document"
+  >
+    <div class="modal-content bg-dark h-50">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createAssetModalTitleId">
+          Create asset...
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <select class="form-select bg-dark text-primary mb-3" aria-label="Select an asset type" onchange="openAssetCreatorForm()" id="assetCreationSelector">
+          <option selected>Open this select menu</option>
+          {% for model in node_model_names %}
+          <option class="dropdown-item" href="#" value="{{ model }}">{{ model }}</op>
+          {% endfor %}
+        </select>
+        <div id="assetCreatorFormContainer">
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-primary" onclick="createAsset(creationFormEditor)">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div
+class="modal fade"
+id="createEdgeModal"
+tabindex="-1"
+data-bs-keyboard="false"
+role="dialog"
+aria-labelledby="createEdgeModalTitleId"
+aria-hidden="true"
+>
+  <div
+    class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg"
+    role="document"
+  >
+    <div class="modal-content bg-dark h-50">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createEdgeModalTitleId">
+          Connect assets with an edge
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <select class="form-select bg-dark text-primary mb-3" aria-label="Select an asset type" onchange="openEdgeCreatorForm()" id="edgeCreationSelector">
+          <option selected>Open this select menu</option>
+          {% for model in edge_model_names %}
+          <option class="dropdown-item" href="#" value="{{ model }}">{{ model }}</op>
+          {% endfor %}
+        </select>
+        <div id="edgeCreatorFormContainer">
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal"
+        >
+          Cancel
+        </button>
+        <button type="button" class="btn btn-primary" onclick="createAsset(creationFormEditor)">Create edge</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {#
+<div class="left-column full-column">
+  <h1>Navigation</h1>
+  <hr />
+  <ul>
+    <li>
+      <button class="tag-btn" data-id="@allTags">Show all</button>
+    </li>
+    {% for tag in tags %}
+    <li>
+      <button class="tag-btn" data-id="{{ tag }}">{{ tag }}</button>
+    </li>
+    {% endfor %}
+  </ul>
+  <a href="/profile">Profile</a>
+  <button id="logout" onclick="logout()">Logout</button>
+  {% if is_admin %}
+  <h2>Administration</h2>
+  <a href="/admin/users">User Management</a>
+  {% endif %}
+</div>
+<!-- <div class="center-column full-column" id="graph"> -->
+<!-- </div> -->
+<div id="graph-element-controls">
+  <h1>
+    Graph
+    <span>
+      <button onclick="openCreateElementPanel()">Create new asset</button>
+    </span>
+  </h1>
+</div>
+<div class="right-column full-column">
+  <h1 id="data-type-text">Asset Editor</h1>
+  <hr />
+  <!-- <form id="json-editor-form" action="/update_asset" method="post"> -->
+  <!-- <form id="json-editor-form"> -->
+    <div id="json-editor-container"></div>
+    <div id="error-container"></div>
+    <input type="button" value="Save" id="save-btn" hidden />
+    <input type="button" value="Delete" id="delete-btn" hidden />
+  <!-- </form> -->
+  <div id="result-container"></div>
+  <!-- <form method="post"> -->
+    <button id="save-notes-btn">Save notes</button
+    ><span id="notes-saved" hidden>Notes saved!</span>
+    <div class="mt-2 w-100">
+      <div id="notes-container"></div>
+    </div>
+  <!-- </form> -->
+</div>
+#}

@@ -1,0 +1,64 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: rgb(39, 39, 39);
+}
+
+.login-form {
+    width: max(450px, min(30vw, 450px));
+    font-size: 15px;
+    background-color: rgb(121, 121, 121);
+    border-radius: 1rem;
+    text-align: center;
+}
+
+.centered {
+    margin: auto;
+}
+
+.login-form h1 {
+    color: white;
+    font-size: 30px;
+    margin-bottom: 20px;
+    margin-top: 20px;
+}
+
+.login-form hr {
+    border: 0;
+    height: 1px;
+    background: rgb(39, 39, 39);
+    background-image: linear-gradient(to right, rgb(39, 39, 39), rgb(121, 121, 121), rgb(39, 39, 39));
+}
+
+.input-box {
+    text-align: center;
+    margin: 0 5vw;
+}
+
+.input-box input {
+    width: max(200px, min(20vw, 200px));
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border-radius: 5vw;
+    border: none;
+    background-color: rgb(39, 39, 39);
+    color: white;
+}
+
+.input-box input:focus {
+    outline: none;
+}
+
+.input-box input[type="submit"] {
+    background-color: rgb(39, 39, 39);
+    color: white;
+    cursor: pointer;
+}
+
+.input-box label {
+    color: white;
+}
+
+.errors {
+    color: #750E21;
+}

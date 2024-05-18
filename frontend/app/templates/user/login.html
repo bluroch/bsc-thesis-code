@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+    <div class="container w-25 rounded-3 p-4 bg-dark translate-middle top-50 start-50 position-absolute ">
+      <h1 class="text-center mb-3">Login</h1>
+      <hr>
+      <div class="w-100 mt-2">
+        <form action="login" method="post" class="w-100">
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              name="email"
+              id="loginEmail"
+              placeholder="example@gagm.local"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Email</label>
+            <input
+              type="password"
+              class="form-control"
+              name="password"
+              id="loginPassword"
+              placeholder="*****"
+              required
+            />
+          </div>
+          <div class="text-center ">
+            <input
+              name="login"
+              id="loginBtn"
+              class="btn btn-primary w-50 rounded-3 "
+              type="submit"
+              value="Login"
+            />
+          </div>
+        </form>
+      </div>
+      {% if error %}
+        <div class="alert alert-danger mt-3" role="alert">
+          {{ error.message }}
+        </div>
+      {% endif %}
+    </div>
+{% endblock %}
+<!-- <!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Login</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ url_for('static', path='/login.css') }}">
+    </head>
+    <body>
+        <div class="login-form centered">
+            <form method="post">
+                <h1>Login</h1>
+                <hr>
+                <div class="input-box">
+                    <label for="email-input">Email</label>
+                    <br>
+                    <input type="email" name="email" id="email-input" required autofocus>
+                </div>
+                <div class="input-box">
+                    <label for="password-input">Password</label>
+                    <br>
+                    <input type="password" name="password" id="password-input" required>
+                </div>
+                <div class="input-box">
+                    <input type="submit" value="Login">
+                </div>
+            </form>
+            <div><h2 class="errors">{{ error }}</h2></div>
+        </div>
+    </body>
+</html> -->

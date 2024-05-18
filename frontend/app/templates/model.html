@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title></title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="{{ url_for('static', filename='code.css') }}"
+      rel="stylesheet"
+    />
+    <script>
+      function syntaxHighlight(json) {
+        json = json
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+        return json.replace(
+          /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+          function (match) {
+            var cls = "number";
+            if (/^"/.test(match)) {
+              if (/:$/.test(match)) {
+                cls = "key";
+              } else {
+                cls = "string";
+              }
+            } else if (/true|false/.test(match)) {
+              cls = "boolean";
+            } else if (/null/.test(match)) {
+              cls = "null";
+            }
+            document.getElementById("model").innerHTML =
+              '<span class="' + cls + '">' + match + "</span>";
+          }
+        );
+      }
+    </script>
+  </head>
+  <body>
+    <div>
+      <h1>{{ model_name }}</h1>
+      <hr />
+      {{ model_schema }}
+      <div id="model"></div>
+      <script>
+        let model = "{{ model_schema|safe }}";
+        syntaxHighlight(model);
+      </script>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Error{% endblock %}
+{% block head %}
+    {{ super() }}
+    <style type="text/css">
+        .error { color: rgb(168, 0, 0); }
+    </style>
+{% endblock %}
+{% block content %}
+    <h1>Error</h1>
+    <p>
+      An error occured. Description:
+    </p>
+    <p class="error">
+        {{ status }} <br/>
+        {{ message }}
+    </p>
+{% endblock %}

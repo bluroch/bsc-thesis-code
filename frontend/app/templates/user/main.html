@@ -1,0 +1,49 @@
+{% extends "base.html" %} {% block title %}Main dashboard{% endblock %} {% block
+head %} {{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', path='/main.css') }}" />
+{% endblock %} {% block scripts %} {{ super() }}
+<script src="{{ url_for('static', path='/scripts/common.js') }}"></script>
+{% endblock %} {% block content %}
+<nav class="container g-0 p-3 text-center bg-dark w-50 translate-middle start-50 top-50 position-absolute ">
+  <h2>Game Asset Graph Manager</h2>
+  <h1>Administration dashboard</h1>
+  <hr />
+  <div class="d-flex row row-cols-12 g-0 gap-3">
+    <a
+      name="graph-btn"
+      id="graph-btn"
+      class="btn btn-primary col py-4 rounded-3 fs-3"
+      href="graph-view"
+      role="button"
+      ><i class="bi bi-play me-2"></i>Graph View</a
+    >
+    <a
+      name="profile-btn"
+      id="profile-btn"
+      class="btn btn-primary col py-4 rounded-3 fs-3"
+      href="profile"
+      role="button"
+      ><i class="bi bi-person me-2"></i>Profile</a
+    >
+    {% if user.is_admin %}
+    <a
+      name="admin-btn"
+      id="admin-btn"
+      class="btn btn-admin col py-4 rounded-3 fs-3"
+      href="admin-dashboard"
+      role="button"
+      ><i class="bi bi-people me-2"></i>Admin</a
+    >
+    {% endif %}
+    <a
+      name="logout-btn"
+      id="logout-btn"
+      class="btn btn-red col py-4 rounded-3 fs-3"
+      href="#"
+      onclick="logout()"
+      role="button"
+      ><i class="bi bi-x-lg me-2"></i>Logout</a
+    >
+  </div>
+</nav>
+{% endblock %}
